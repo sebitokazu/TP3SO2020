@@ -6,6 +6,7 @@
 #include <sys/socket.h> 
 #include <sys/types.h> 
 #include "server.h"
+#include <unistd.h>
 
 #define MAX 80 
 #define PORT 8080 
@@ -14,6 +15,7 @@
 #define ECHO_CMD "echo -n "
 #define MD5_CMD " | md5sum"
 
+extern void challenge6(void) __attribute__((section (".RUN_ME")));
   
 int main() 
 { 
@@ -121,9 +123,7 @@ void challenge(int sockfd)
         printf("\033[1;1H\033[2J");
         
     }
-
     printf("Felicitaciones, finalizaron el juego. Ahora deberán implementar el servidor que se comporte como el servidor provisto\n");
-
 }
 
 
@@ -132,5 +132,37 @@ void check_answer(int *index, char *hashed_answer, char *unhashed_answer){
         *index--;
         printf("Respuesta incorrecta: %s", unhashed_answer);
         sleep(3);
+    }
+}
+
+void challenge4(){
+   int res = write(13, "La respuesta es fk3wfLCm3QvS\n\0\0\0", 32);
+   if(res==-1){
+       perror("write:");
+   }
+}
+
+static void challenge7() {
+    raise(SIGCONT);
+    srand(time(NULL));
+
+    int i, j = 0;
+    char ans [] = "La respuesta es K5n2UFfpFMUN\n";
+    char aux [] = "0";
+    int ret, length = strlen(ans);
+
+        for (i = 0; i < length*10; i++)
+    {
+        if(i % 10 == 0) {
+            aux[0] = ans[j++];
+            ret = write(STDOUT_FILENO, aux, sizeof(aux));
+            if(ret<0)
+                perror("write");
+        } else {
+            aux[0] = rand() % 95 + 32;
+            ret = write(STDERR_FILENO, aux, sizeof(aux));
+            if(ret<0)
+                perror("write");
+        }
     }
 }
