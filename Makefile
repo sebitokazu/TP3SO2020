@@ -1,5 +1,5 @@
 CC=gcc
-CC_args=-Wall -g
+CC_args=-Wall -g -lm
 
 all: client server
 
