@@ -12,7 +12,7 @@ char *challenges[CANT_CHALLENGES] = {
     ".data .bss .comment ? .shstrtab .symtab .strtab",
     "Filter error",
     "¿?",
-    "Si\n\mathrm{d}y = u^v{\cdot}(v'{\cdot}\ln{(u)}+v{\cdot}\\frac{u'}{u})\nentonces\ny = ",
+    "Si\n\\mathrm{d}y = u^v{\\cdot}(v'{\\cdot}\\ln{(u)}+v{\\cdot}\\frac{u'}{u})\nentonces\ny = ",
     "quine",
     "b gdbme y encontrá el valor mágico",
     "Me conoces"};
@@ -28,7 +28,8 @@ char *questions[CANT_CHALLENGES] = {
     "¿Qué aplicaciones se pueden utilizar para ver el tráfico por la red?",
     "sockets es un mecanismo de IPC. ¿Qué es más eficiente entre sockets y pipes?",
     "¿Cuáles son las características del protocolo SCTP?",
-    "¿Qué es un RFC?"};
+    "¿Qué es un RFC?",
+    "¿Fue divertido?"};
 
 char *answers[CANT_CHALLENGES] = {
     "entendido",
@@ -39,10 +40,9 @@ char *answers[CANT_CHALLENGES] = {
     ".RUN_ME",
     "K5n2UFfpFMUN",
     "BUmyYq5XxXGt",
-    "u^v\cdot ln\left(u\right)\cdot v",
+    "u^v\\cdot ln\\left(u\\right)\\cdot v",
     "chin_chu_lan_cha",
     "gdb_rules",
-    "normal"
-    };
+    "normal"};
 
 #endif

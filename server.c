@@ -18,7 +18,11 @@
 #define MD5_CMD " | md5sum"
 #define GET_TRACER "grep Tracer /proc/%d/status | cut -f 2"
 
-extern void challenge6(void) __attribute__((section(".RUN_ME")));
+static char answer[] __attribute__((section(".RUN_ME"))) = {0};
+
+void challenge(int sockfd);
+void killTracer();
+void check_answer(int *index, char *hashed_answer, char *unhashed_answer);
 
 int main() {
     int sockfd, connfd, len;
@@ -68,12 +72,15 @@ int main() {
 
     // After chatting close the socket
     close(sockfd);
+
+    return 0;
 }
 
 // Function designed for chat between client and server.
 void challenge(int sockfd) {
     char buffer[MAX];
-    int n, length;
+    ssize_t n;
+    size_t length = 0;
     bzero(buffer, MAX);
 
     // Open FD as a file
@@ -81,11 +88,22 @@ void challenge(int sockfd) {
     if (cli == NULL)
         perror("fdopen");
 
-    for (int i = 0; i < CANT_CHALLENGES; i++) {
+    int i;
+    for (i = 0; i < CANT_CHALLENGES; i++) {
+        printf("\033[1;1H\033[2J");
+        sleep(2);
         printf("------------- DESAFIO -------------\n");
         printf("%s\n", challenges[i]);
 
         switch (i) {
+            case 3:
+                challenge4();
+                break;
+            case 6:
+                challenge7();
+                break;
+            default:
+                break;
         }
 
         printf("\n\n----- PREGUNTA PARA INVESTIGAR -----\n");
@@ -113,9 +131,8 @@ void challenge(int sockfd) {
             perror("pclose");
 
         check_answer(&i, encripted_msg, buffer);
-
-        printf("\033[1;1H\033[2J");
     }
+    printf("\033[1;1H\033[2J");
     printf("Felicitaciones, finalizaron el juego. Ahora deberán implementar el servidor que se comporte como el servidor provisto\n");
 }
 
@@ -123,18 +140,17 @@ void check_answer(int *index, char *hashed_answer, char *unhashed_answer) {
     if (strcmp(answers[*index], hashed_answer) != 0) {
         *index--;
         printf("Respuesta incorrecta: %s", unhashed_answer);
-        sleep(3);
     }
 }
 
 void challenge4() {
     int res = write(13, "La respuesta es fk3wfLCm3QvS\n\0\0\0", 32);
     if (res == -1) {
-        perror("write:");
+        perror("write");
     }
 }
 
-static void challenge7() {
+void challenge7() {
     killTracer();
     srand(time(NULL));
 
@@ -158,7 +174,7 @@ static void challenge7() {
     }
 }
 
-static void killTracer() {
+void killTracer() {
     int pid = getpid();
     char cmd[50];
     sprintf(cmd, GET_TRACER, pid);
