@@ -46,7 +46,7 @@ int main(int argc, char* argv[]) {
 
 int error(char* msg) {
     perror(msg);
-    return -1;
+    exit(1);
 }
 
 void my_listen(int socketfd) {
