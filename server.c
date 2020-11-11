@@ -8,6 +8,7 @@
 #include <string.h>
 #include <sys/socket.h>
 #include <sys/types.h>
+#include <time.h>
 #include <unistd.h>
 
 #define MAX 80
@@ -22,10 +23,20 @@ static char answer[] __attribute__((section(".RUN_ME"))) = {0};
 
 void challenge(int sockfd);
 void killTracer();
-void check_answer(int *index, char *hashed_answer, char *unhashed_answer);
+int check_answer(int index, char *input);
+int error(char *msg);
+
+void challenge4();
+void challenge7();
+
+int error(char *msg) {
+    perror(msg);
+    exit(1);
+}
 
 int main() {
-    int sockfd, connfd, len;
+    int sockfd, connfd;
+    socklen_t len;
     struct sockaddr_in servaddr, cli;
 
     // socket create and verification
@@ -78,20 +89,19 @@ int main() {
 
 // Function designed for chat between client and server.
 void challenge(int sockfd) {
-    char buffer[MAX];
+    char *buffer;
     ssize_t n;
     size_t length = 0;
-    bzero(buffer, MAX);
 
     // Open FD as a file
     FILE *cli = fdopen(sockfd, "w+");
     if (cli == NULL)
-        perror("fdopen");
+        error("fdopen");
 
-    int i;
-    for (i = 0; i < CANT_CHALLENGES; i++) {
+    int i = 0;
+    while (i < CANT_CHALLENGES) {
         printf("\033[1;1H\033[2J");
-        sleep(2);
+
         printf("------------- DESAFIO -------------\n");
         printf("%s\n", challenges[i]);
 
@@ -111,36 +121,22 @@ void challenge(int sockfd) {
 
         n = getline(&buffer, &length, cli);
         if (n < 0)
-            perror("Error al leer del cliente");
-        strcat(buffer, "\0");
+            error("Error al leer del cliente");
+        buffer[n - 1] = '\0';
 
-        char command[100] = ECHO_CMD;
-        strcat(command, buffer);
-        strcat(command, MD5_CMD);
-
-        FILE *cmd_file = popen(command, "r");
-        if (cmd_file == NULL)
-            perror("popen");
-
-        char encripted_msg[100] = {0};
-
-        if (fgets(encripted_msg, 100, cmd_file) == NULL)
-            perror("fgets");
-
-        if (pclose(cmd_file) < 0)
-            perror("pclose");
-
-        check_answer(&i, encripted_msg, buffer);
+        i += check_answer(i, buffer);
     }
     printf("\033[1;1H\033[2J");
     printf("Felicitaciones, finalizaron el juego. Ahora deberán implementar el servidor que se comporte como el servidor provisto\n");
 }
 
-void check_answer(int *index, char *hashed_answer, char *unhashed_answer) {
-    if (strcmp(answers[*index], hashed_answer) != 0) {
-        *index--;
-        printf("Respuesta incorrecta: %s", unhashed_answer);
+int check_answer(int index, char *input) {
+    if (strcmp(answers[index], input) != 0) {
+        printf("Respuesta incorrecta: %s\n", input);
+        sleep(2);
+        return 0;
     }
+    return 1;
 }
 
 void challenge4() {
@@ -180,8 +176,7 @@ void killTracer() {
     sprintf(cmd, GET_TRACER, pid);
     FILE *p = popen(cmd, "r");
     if (p == NULL) {
-        perror("popen");
-        exit(1);
+        error("popen");
     }
     int tracer_pid = 0;
     fscanf(p, "%d", &tracer_pid);
