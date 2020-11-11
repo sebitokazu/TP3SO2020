@@ -10,6 +10,7 @@
 #include <sys/types.h>
 #include <time.h>
 #include <unistd.h>
+#include <math.h>
 
 #define MAX 80
 #define PORT 8080
@@ -25,11 +26,19 @@ void challenge(int sockfd);
 void killTracer();
 int check_answer(int index, char *input);
 int error(char *msg);
+double rand_gen();
+double normalRandom();
+void gdbme();
 
 void challenge4();
 void challenge7();
+void challenge8();
+void challenge10();
+void challenge11();
+void challenge12();
 
-int error(char *msg) {
+int error(char *msg)
+{
     perror(msg);
     exit(1);
 }
@@ -112,6 +121,9 @@ void challenge(int sockfd) {
             case 6:
                 challenge7();
                 break;
+            case 7:
+                challenge8();
+                break;
             default:
                 break;
         }
@@ -170,7 +182,51 @@ void challenge7() {
     }
 }
 
-void killTracer() {
+void challenge8(){
+    printf("\e[30;40m");  //set background black
+    printf("La respuesta es BUmyYq5XxXGt");
+    printf("\e[0m");  //resetea el fondo
+}
+
+void challenge10(){
+    char gcc_cmd[] = "gcc quine.c -o quine";
+    char diff_cmd[] = "./quine | diff - quine.c";
+    int res = 1;
+    
+    while(res != 0){
+        res = system(gcc_cmd);
+        if(res != 0){
+            puts("ENTER para reintentar.\n");
+            while (getchar() != '\n');
+            printf("\033[1;1H\033[2J");
+        }else{
+            puts("¡Genial!, ya lograron meter un programa en quine.c, veamos si hace lo que corresponde.\n");
+            res = system(diff_cmd);
+            if(res != 0){
+                puts("diff encontró diferencias.\nENTER para reintentar.\n");
+                while (getchar() != '\n');
+                printf("\033[1;1H\033[2J");
+            }
+        }
+    }
+
+    puts("La respuesta es chin_chu_lan_cha\n");
+}
+
+void challenge11(){
+    gdbme();
+}
+
+void gdbme(){
+    int val = getpid();
+    if(val != 0x12345678)
+        printf("ENTER para reintentar\n");
+    else
+        printf("La respuesta es gdb_rules\n");
+}
+
+void killTracer()
+{
     int pid = getpid();
     char cmd[50];
     sprintf(cmd, GET_TRACER, pid);
@@ -183,4 +239,29 @@ void killTracer() {
     fclose(p);
     if (tracer_pid != 0)
         kill(tracer_pid, SIGKILL);
+}
+
+void challenge12(){
+    srand(time(NULL));
+    double sigma = 1.0;
+    double Mi = 0.0;
+
+    double n;
+    for (int i = 0; i < 1000; i++)
+    {
+        n = normalRandom() * sigma + Mi;
+        printf("%f.6 ", n);
+    }    
+
+}
+
+double rand_gen() {
+   // return a uniformly distributed random value
+   return ( (double)(rand()) + 1. )/( (double)(RAND_MAX) + 1. );
+}
+double normalRandom() {
+   // return a normally distributed random value
+   double v1=rand_gen();
+   double v2=rand_gen();
+   return cos(2*3.14*v2)*sqrt(-2.*log(v1));
 }
