@@ -10,10 +10,13 @@ int error(char*);
 void my_listen(int);
 
 int main(int argc, char* argv[]) {
-    if (argc < 3)
-        error("Not enough arguments...");
-    else if (argc > 3)
-        error("Too much arguments...");
+    if (argc < 3) {
+        printf("Not enough arguments...\n");
+        exit(1);
+    } else if (argc > 3) {
+        printf("Too much arguments...\n");
+        exit(1);
+    }
 
     int socketfd, port;
     struct sockaddr_in server;

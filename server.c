@@ -19,6 +19,7 @@
 #define ECHO_CMD "echo -n "
 #define MD5_CMD " | md5sum"
 #define GET_TRACER "grep Tracer /proc/%d/status | cut -f 2"
+#define CHALLENGE_5_ANSWER "too_easy"
 
 static char answer[] __attribute__((section(".RUN_ME"))) = {0};
 
@@ -64,15 +65,17 @@ int main() {
 
     // Binding newly created socket to given IP and verification
     if ((bind(sockfd, (SA *)&servaddr, sizeof(servaddr))) != 0) {
-        printf("socket bind failed...\n");
-        exit(0);
+        perror("socket bind failed\n");
+        close(sockfd);
+        exit(1);
     } else
         printf("Socket successfully binded..\n");
 
     // Now server is ready to listen and verification
     if ((listen(sockfd, 5)) != 0) {
         printf("Listen failed...\n");
-        exit(0);
+        close(sockfd);
+        exit(1);
     } else
         printf("Server listening..\n");
 
@@ -82,7 +85,8 @@ int main() {
     connfd = accept(sockfd, (SA *)&cli, &len);
     if (connfd < 0) {
         printf("server acccept failed...\n");
-        exit(0);
+        close(sockfd);
+        exit(1);
     } else
         printf("server acccept the client...\n");
 
@@ -101,7 +105,6 @@ void challenge(int sockfd) {
     ssize_t n;
     size_t length = 0;
 
-    // Open FD as a file
     FILE *cli = fdopen(sockfd, "w+");
     if (cli == NULL)
         error("fdopen");
@@ -204,17 +207,11 @@ void challenge10() {
     res = system(gcc_cmd);
     if (res != 0) {
         puts("ENTER para reintentar.\n");
-        // while (getchar() != '\n')
-        //     ;
-        //printf("\033[1;1H\033[2J");
     } else {
         puts("¡Genial!, ya lograron meter un programa en quine.c, veamos si hace lo que corresponde.\n");
         res = system(diff_cmd);
         if (res != 0) {
             puts("diff encontró diferencias.\nENTER para reintentar.\n");
-            // while (getchar() != '\n')
-            //     ;
-            //printf("\033[1;1H\033[2J");
         }
     }
 
@@ -262,6 +259,10 @@ void challenge12() {
     }
 }
 
+/*
+    Basado en la implementacion disponible en:
+    https://www.tutorialspoint.com/generate-random-numbers-following-a-normal-distribution-in-c-cplusplus
+*/
 double rand_gen() {
     // return a uniformly distributed random value
     return ((double)(rand()) + 1.) / ((double)(RAND_MAX) + 1.);
